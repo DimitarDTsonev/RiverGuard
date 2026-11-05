@@ -23,7 +23,10 @@ const row:CSSProperties={display:'flex',alignItems:'center',gap:10,flexWrap:'wra
 const muted:CSSProperties={color:'var(--muted-foreground,#6b7a87)',fontSize:13,lineHeight:1.65};
 const sourceById=new Map(content.sources.map(source=>[source.id,source]));
 const categoryById:Record<string,string>={rls500:'Ниво',pls500:'Ниво',pluvio:'Валеж',rq30:'Скорост и разход',netdl:'Телеметрия',solar:'Инфраструктура',gauge:'Инфраструктура',cabinet:'Инфраструктура'};
-const baseCounts:Record<string,string>={rls500:'3 в пилота',pls500:'3 в пилота',pluvio:'1 в пилота',rq30:'Разширение',netdl:'3 + 1 пункта'};
+const pilotPointCount=content.pilotStationRoles.length;
+const pilotSensorCounts:Record<string,number>=Object.fromEntries(content.pilotKit.sensors.map(item=>[item.productId,item.quantity]));
+const pilotSensorTotal=content.pilotKit.sensors.reduce((sum,item)=>sum+item.quantity,0);
+const baseCounts:Record<string,string>={...Object.fromEntries(content.pilotKit.sensors.map(item=>[item.productId,`${item.quantity} в пилота`])),rq30:'Разширение',netdl:`${pilotPointCount}; +1 при отделна площадка`};
 const icons={rls500:Waves,pls500:Gauge,pluvio:CloudRain,rq30:Waves,netdl:RadioTower,solar:Sun,gauge:Ruler,cabinet:ShieldCheck};
 
 const genericProducts:Product[]=[
@@ -39,8 +42,8 @@ const genericProducts:Product[]=[
   {
     id:'gauge',name:'Водомерна рейка и репер',category:'Ръчна проверка',manufacturer:'Избор след теренен проект',generic:true,
     application:'Независим начин за проверка на показанията и обща отправна нула за двата датчика.',
-    recommendedConfiguration:'По една рейка и стабилен геодезически репер на всеки от трите речни пункта.',
-    specifications:[{name:'Количество',value:'3 комплекта'},{name:'Обхват',value:'Според проектните ниски и високи води'},{name:'Нула',value:'Геодезически определена'},{name:'Достъп',value:'Безопасен за ръчен отчет'}],
+    recommendedConfiguration:'По една рейка и стабилен геодезически репер на всеки речен пункт в пилота.',
+    specifications:[{name:'Количество',value:`${pilotPointCount} комплекта`},{name:'Обхват',value:'Според проектните ниски и високи води'},{name:'Нула',value:'Геодезически определена'},{name:'Достъп',value:'Безопасен за ръчен отчет'}],
     standards:[{name:'ISO 4373:2022',status:'Методическа основа за заданието; не е удостоверено съответствие на неизбран продукт',evidence:'iso4373'}],
     constraints:['Нулата се документира и се проверява след изменение на конструкцията.','При високи води не се изисква опасно приближаване за ръчен отчет.'],
     priceLabel:'По проект и оферта',warranty:'Условията за рейката, закрепването и монтажната работа се уговарят отделно.',sources:['iso4373']
@@ -98,15 +101,16 @@ function ProductCard({product,canOrder,onOrder}:{product:Product;canOrder:boolea
 }
 
 function PilotSchematic(){
-  return <div style={{background:'#f2f8f5',border:'1px solid #e1ece6',borderRadius:14,overflow:'hidden'}}>
-    <svg viewBox="0 0 820 205" role="img" aria-label="Схема на три предложени речни пункта: горен, градски и долен, с отделна валежна площадка" style={{display:'block',width:'100%',minHeight:140}}>
+  return <div className="pilot-schematic" tabIndex={0} role="region" aria-label="Условна схема на пилота; на тесен екран може да се превърта хоризонтално" style={{background:'#f2f8f5',border:'1px solid #e1ece6',borderRadius:14,overflowX:'auto'}}>
+    <style>{'@media print{.pilot-schematic{overflow:visible!important;break-inside:avoid}.pilot-schematic svg{min-width:0!important}}'}</style>
+    <svg viewBox="0 0 820 220" role="img" aria-label="Пет предложени речни пункта: TRV-001, TRV-004, TRV-002, TRV-005 и TRV-003. Валежният канал е към TRV-001 в демонстрацията. Схемата не определя монтажни места." style={{display:'block',width:'100%',minWidth:760}}>
       <defs><pattern id="pilot-grid" width="24" height="24" patternUnits="userSpaceOnUse"><path d="M 24 0 L 0 0 0 24" fill="none" stroke="#e2ece6" strokeWidth="0.6"/></pattern></defs>
-      <rect width="820" height="205" fill="url(#pilot-grid)"/>
-      <path d="M-20 160 C90 170,110 73,190 101 S302 163,390 118 S520 75,570 114 S704 139,850 68" stroke="#d4e7e0" strokeWidth="38" fill="none"/>
-      <path d="M-20 160 C90 170,110 73,190 101 S302 163,390 118 S520 75,570 114 S704 139,850 68" stroke="#7cb7aa" strokeWidth="2" strokeDasharray="5 6" fill="none"/>
-      {[[170,97,'TRV-001','Горен участък'],[410,109,'TRV-002','Градски участък'],[650,126,'TRV-003','Долен участък']].map(([x,y,id,label])=><g key={String(id)}><circle cx={Number(x)} cy={Number(y)} r="15" fill="#fff" stroke="#197a67" strokeWidth="2"/><circle cx={Number(x)} cy={Number(y)} r="5" fill="#197a67"/><text x={Number(x)} y={Number(y)+34} textAnchor="middle" fill="#255548" fontSize="11" fontFamily="Arial,sans-serif" fontWeight="700">{id}</text><text x={Number(x)} y={Number(y)+51} textAnchor="middle" fill="#607969" fontSize="11" fontFamily="Arial,sans-serif">{label}</text></g>)}
-      <rect x="282" y="20" width="212" height="38" rx="8" fill="#fff" stroke="#d8e7de"/><text x="388" y="44" textAnchor="middle" fill="#426c5c" fontSize="12" fontFamily="Arial,sans-serif">1 представителна валежна площадка</text>
-      <path d="M340 58 L340 83" stroke="#9db8aa" strokeDasharray="3 4"/><text x="22" y="24" fill="#779386" fontSize="10" fontFamily="Arial,sans-serif">СХЕМА НА НАБЛЮДЕНИЕТО · НЕ Е ТЕРЕНЕН ПРОЕКТ</text>
+      <rect width="820" height="220" fill="url(#pilot-grid)"/>
+      <path d="M-20 152 C50 152,55 116,100 126 S208 154,255 137 S355 91,410 115 S522 139,565 112 S663 81,720 98 S796 115,850 76" stroke="#d4e7e0" strokeWidth="38" fill="none"/>
+      <path d="M-20 152 C50 152,55 116,100 126 S208 154,255 137 S355 91,410 115 S522 139,565 112 S663 81,720 98 S796 115,850 76" stroke="#7cb7aa" strokeWidth="2" strokeDasharray="5 6" fill="none"/>
+      {[[100,126,'TRV-001','Горен участък'],[255,137,'TRV-004','Южен допълнителен'],[410,115,'TRV-002','Градски участък'],[565,112,'TRV-005','Северен допълнителен'],[720,98,'TRV-003','Долен участък']].map(([x,y,id,label])=><g key={String(id)}><circle cx={Number(x)} cy={Number(y)} r="15" fill="#fff" stroke="#197a67" strokeWidth="2"/><circle cx={Number(x)} cy={Number(y)} r="5" fill="#197a67"/><text x={Number(x)} y={Number(y)+34} textAnchor="middle" fill="#255548" fontSize="12" fontFamily="Arial,sans-serif" fontWeight="700">{id}</text><text x={Number(x)} y={Number(y)+53} textAnchor="middle" fill="#607969" fontSize="12" fontFamily="Arial,sans-serif">{label}</text></g>)}
+      <rect x="25" y="45" width="220" height="38" rx="8" fill="#fff" stroke="#d8e7de"/><text x="135" y="69" textAnchor="middle" fill="#426c5c" fontSize="12" fontFamily="Arial,sans-serif">Валежен канал · TRV-001</text>
+      <path d="M100 83 L100 109" stroke="#9db8aa" strokeDasharray="3 4"/><text x="22" y="24" fill="#779386" fontSize="10" fontFamily="Arial,sans-serif">СХЕМА НА НАБЛЮДЕНИЕТО · НЕ Е ТЕРЕНЕН ПРОЕКТ</text>
     </svg>
   </div>;
 }
@@ -116,35 +120,36 @@ export default function Equipment({section,stations,orders,session,onOrder,notif
   const [category,setCategory]=useState('Всички');
   const canOrder=session.role==='admin'||session.role==='municipal';
   const canOrderTryavna=canOrder&&(session.role==='admin'||session.municipality==='Трявна');
-  const tryavna=stations.filter(station=>station.id.startsWith('TRV-')).slice(0,3);
+  const tryavna=stations.filter(station=>station.municipality==='Трявна');
   const filtered=useMemo(()=>catalogue.filter(product=>(category==='Всички'||categoryById[product.id]===category)&&`${product.name} ${product.category} ${product.manufacturer} ${product.application}`.toLocaleLowerCase('bg').includes(search.toLocaleLowerCase('bg'))),[search,category]);
   const requestCount=orders.filter(order=>session.role==='admin'||order.municipality===session.municipality).length;
   function exportSpecification(){
-    const payload={project:content.project,reviewedAt:content.reviewedAt,status:content.status,pilot:content.pilotKit,products:catalogue,placement:content.installationWorkflow,measurements:content.measurementPolicy,sources:content.sources.map(({id,title,url})=>({id,title,url}))};
+    const payload={project:content.project,reviewedAt:content.reviewedAt,status:content.status,pilot:content.pilotKit,stationRoles:content.pilotStationRoles,stations:tryavna.map(({id,name,river,municipality,lat,lng,locationStatus,sensors,interval,transmitInterval,riverSection})=>({id,name,river,municipality,lat,lng,locationStatus,sensors,interval,transmitInterval,riverSection})),products:catalogue,placement:content.installationWorkflow,measurements:content.measurementPolicy,sources:content.sources.map(({id,title,url})=>({id,title,url}))};
     downloadBlob(new Blob([JSON.stringify(payload,null,2)],{type:'application/json;charset=utf-8'}),'RiverGuard_Tryavna_specification.json');
     notify('Спецификацията е изтеглена. Комплектовката и местата подлежат на одобрение.');
   }
 
   if(section==='pilot') return <div style={{display:'grid',gap:22}}>
-    <SectionHead eyebrow="ПИЛОТЕН РЕГИОН / ГАБРОВО" title="Пилот „Трявна“" description="Три речни пункта по Тревненска. Два независими принципа за ниво. Една обща картина." actions={<><button className="button secondary" onClick={exportSpecification}><Download size={16}/> Спецификация</button><button className="button secondary" onClick={()=>window.print()}><Printer size={16}/> Печат</button></>}/>
+    <SectionHead eyebrow="ПИЛОТЕН РЕГИОН / ГАБРОВО" title="Пилот „Трявна“" description={`${tryavna.length} станции в община Трявна. Два независими принципа за ниво в базовия комплект. Една обща картина.`} actions={<><button className="button secondary" onClick={exportSpecification}><Download size={16}/> Спецификация</button><button className="button secondary" onClick={()=>window.print()}><Printer size={16}/> Печат</button></>}/>
 
     <section className="card" style={{background:'#143c35',color:'#f2faf6',border:0,overflow:'hidden'}}>
       <div style={{padding:26,display:'flex',gap:28,justifyContent:'space-between',flexWrap:'wrap'}}>
-        <div style={{maxWidth:570}}><div style={{fontSize:10,letterSpacing:'0.14em',color:'#9cd3bc',fontWeight:700,marginBottom:11}}>ОСНОВНА КОМПЛЕКТОВКА · 3 + 3 + 1</div><h2 style={{fontSize:25,lineHeight:1.25,margin:'0 0 12px'}}>Подготвен за теренен анализ</h2><p style={{fontSize:14,lineHeight:1.75,color:'#d5e6dd',margin:0}}>Основното ниво се следи с радар, а потопена сонда дава независимо резервно измерване и температура на водата. Местата, монтажът и праговете се утвърждават от специалистите и общината.</p></div>
-        <div style={{display:'flex',gap:30,alignItems:'center'}}>{[['03','речни пункта'],['06','датчика за ниво'],['01','дъждомер']].map(([value,label])=><div key={label}><div style={{fontSize:38,fontWeight:600,lineHeight:1.2,fontVariantNumeric:'tabular-nums'}}>{value}</div><div style={{fontSize:11,color:'#b6d2c4',marginTop:5}}>{label}</div></div>)}</div>
+        <div style={{maxWidth:570}}><div style={{fontSize:10,letterSpacing:'0.14em',color:'#9cd3bc',fontWeight:700,marginBottom:11}}>ОСНОВНА КОМПЛЕКТОВКА · {content.pilotKit.sensors.map(item=>item.quantity).join(' + ')}</div><h2 style={{fontSize:25,lineHeight:1.25,margin:'0 0 12px',color:'#f2faf6'}}>Подготвен за теренен анализ</h2><p style={{fontSize:14,lineHeight:1.75,color:'#d5e6dd',margin:0}}>Основното ниво се следи с радар, а потопена сонда дава независимо резервно измерване и температура на водата. Местата, монтажът и праговете се утвърждават от специалистите и общината.</p></div>
+        <div style={{display:'flex',gap:30,alignItems:'center',flexWrap:'wrap'}}>{[[pilotPointCount,'речни пункта'],[pilotSensorCounts.rls500+pilotSensorCounts.pls500,'датчика за ниво'],[pilotSensorCounts.pluvio,'дъждомер']].map(([value,label])=><div key={label}><div style={{fontSize:38,fontWeight:600,lineHeight:1.2,fontVariantNumeric:'tabular-nums'}}>{String(value).padStart(2,'0')}</div><div style={{fontSize:11,color:'#b6d2c4',marginTop:5}}>{label}</div></div>)}</div>
       </div>
     </section>
 
     <PilotSchematic/>
 
-    <div style={grid}>{content.pilotStationRoles.slice(0,3).map((place,index)=>{
+    <div style={grid}>{content.pilotStationRoles.map(place=>{
       const station=tryavna.find(s=>s.id===place.id);
-      const locationLabel=station?.locationStatus==='approved'?'Одобрено в демонстрацията':station?.locationStatus==='reviewed'?'Разгледано в демонстрацията':'Предложено място';
-      return <article className="card" key={place.id}><div className="card-body" style={{padding:21}}><div style={{...row,justifyContent:'space-between',marginBottom:14}}><span className="eyebrow">{place.id}</span><MapPin size={17} color="#648577"/></div><h3 style={{fontSize:18,margin:'0 0 9px'}}>{place.name}</h3><p style={{fontSize:13,lineHeight:1.7,minHeight:44}}>{place.purpose}</p><div style={{...row,margin:'15px 0'}}><span className="badge">RLS 500</span><span className="badge">PLS 500</span>{index===0&&<span className="badge">+ валежен канал</span>}</div><div style={{borderTop:'1px solid var(--border,#e6ebe8)',paddingTop:13,fontSize:12}}><span style={{display:'inline-flex',alignItems:'center',gap:6,color:'#85651c'}}><span style={{width:6,height:6,background:'#b99748',borderRadius:'50%'}}/>{locationLabel}</span><p className="muted" style={{fontSize:11,margin:'7px 0 0'}}>Координатите на картата са примерни. Теренният протокол и одобренията се управляват в „Станции“.</p></div></div></article>;
+      const locationLabel=!station?'Не е в регистъра за община Трявна':station.locationStatus==='approved'?'Одобрено в демонстрацията':station.locationStatus==='reviewed'?'Разгледано в демонстрацията':'Предложено място';
+      const sensorIds=station?.sensors??place.sensors;
+      return <article className="card" key={place.id}><div className="card-body" style={{padding:21}}><div style={{...row,justifyContent:'space-between',marginBottom:14}}><span className="eyebrow">{place.id}</span><MapPin size={17} color="#648577"/></div><h3 style={{fontSize:18,margin:'0 0 9px'}}>{station?.name??place.name}</h3><p style={{fontSize:13,lineHeight:1.7,minHeight:44}}>{place.purpose}</p><div style={{...row,margin:'15px 0'}}>{sensorIds.map(id=><span className="badge" key={id}>{content.products.find(product=>product.id===id)?.name??id}</span>)}</div>{!station&&<p className="muted" style={{fontSize:11}}>Показан е предложеният комплект от каталога.</p>}<div style={{borderTop:'1px solid var(--border,#e6ebe8)',paddingTop:13,fontSize:12}}><span style={{display:'inline-flex',alignItems:'center',gap:6,color:'#85651c'}}><span style={{width:6,height:6,background:'#b99748',borderRadius:'50%'}}/>{locationLabel}</span><p className="muted" style={{fontSize:11,margin:'7px 0 0'}}>Координатите на картата са примерни. Теренният протокол и одобренията се управляват в „Станции“.</p></div></div></article>;
     })}</div>
 
     <div className="content-grid" style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(min(100%,360px),1fr))',gap:22}}>
-      <section className="card"><div className="card-header"><div><div className="eyebrow">КОМПЛЕКТОВКА</div><h2>Измервателното ядро</h2></div><Package size={20}/></div><div className="table-wrap"><table><thead><tr><th>Оборудване</th><th>Брой</th><th>Роля</th><th aria-label="Действие"/></tr></thead><tbody>{content.pilotKit.sensors.map(item=>{const product=catalogue.find(p=>p.id===item.productId)!;return <tr key={item.productId}><td><strong>{product.name}</strong></td><td>{item.quantity}</td><td style={{fontSize:12}}>{item.scope}</td><td><button className="button secondary" disabled={!canOrderTryavna} title={canOrderTryavna?'Заявка за оборудване за Трявна':'Заявка за Трявна може да създаде администратор или оператор на общината'} onClick={()=>onOrder(item.productId)}><Plus size={14}/><span>Заяви</span></button></td></tr>})}</tbody></table></div><div className="card-body" style={{padding:20}}><p className="muted" style={{fontSize:12,lineHeight:1.7}}>Това са 7 физически измервателни устройства. Температурата идва от трите PLS 500. Регистратори, комуникации, захранване и монтаж са отделни части от станцията.</p><Details title="Пълна инфраструктура и резерви"><div className="prose">{content.pilotKit.infrastructure.map(item=><div key={item.item} style={{marginBottom:15}}><strong>{item.item} · {item.quantity}</strong><p>{item.purpose}</p></div>)}<h4>Препоръчан резерв</h4><ul>{content.pilotKit.recommendedSpares.map(item=><li key={item.item}>{item.quantity} × {item.item}</li>)}</ul></div></Details></div></section>
+      <section className="card"><div className="card-header"><div><div className="eyebrow">КОМПЛЕКТОВКА</div><h2>Измервателното ядро</h2></div><Package size={20}/></div><div className="table-wrap"><table><thead><tr><th>Оборудване</th><th>Брой</th><th>Роля</th><th aria-label="Действие"/></tr></thead><tbody>{content.pilotKit.sensors.map(item=>{const product=catalogue.find(p=>p.id===item.productId)!;return <tr key={item.productId}><td><strong>{product.name}</strong></td><td>{item.quantity}</td><td style={{fontSize:12}}>{item.scope}</td><td><button className="button secondary" disabled={!canOrderTryavna} title={canOrderTryavna?'Заявка за оборудване за Трявна':'Заявка за Трявна може да създаде администратор или оператор на общината'} onClick={()=>onOrder(item.productId)}><Plus size={14}/><span>Заяви</span></button></td></tr>})}</tbody></table></div><div className="card-body" style={{padding:20}}><p className="muted" style={{fontSize:12,lineHeight:1.7}}>Основният комплект съдържа {pilotSensorTotal} физически измервателни устройства. Температурата идва от {pilotSensorCounts.pls500} сонди PLS 500. Регистратори, комуникации, захранване и монтаж са отделни части от станцията.</p><Details title="Пълна инфраструктура и резерви"><div className="prose">{content.pilotKit.infrastructure.map(item=><div key={item.item} style={{marginBottom:15}}><strong>{item.item} · {item.quantity}</strong><p>{item.purpose}</p></div>)}<h4>Препоръчан резерв</h4><ul>{content.pilotKit.recommendedSpares.map(item=><li key={item.item}>{item.quantity} × {item.item}</li>)}</ul></div></Details></div></section>
 
       <section className="card"><div className="card-header"><div><div className="eyebrow">ИНЖЕНЕРНО ОСНОВАНИЕ</div><h2>Съобразено с речния участък</h2></div><Waves size={21}/></div><div className="card-body prose" style={{padding:22,fontSize:13}}><div style={{display:'grid',gap:17}}>{[
         ['Безконтактно основно ниво','Радарът е извън водата. Мястото се избира така, че пяна, мостови опори, наноси и плаващи предмети да не компрометират показанията.'],

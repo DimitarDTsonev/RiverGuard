@@ -1,6 +1,7 @@
 import { env } from 'cloudflare:workers';
 import { getChatGPTUser } from '../app/chatgpt-auth';
 import { seedStations, seedRules } from './seed';
+import { enrichStationMetadata } from './station-metadata.mjs';
 import type { Session, Role, Station, Reading, Alert, Order, Ticket, Approval, Rule, Bootstrap, Membership } from './types';
 import { ApiError, ROLES, assertRole, assertScope, assertSameOrigin, requiredText, numberIn, oneOf, canExport, validateStation, validateOrder, validateApproval, simulatedReading, alertKey, parsePeriod, stationMatches, csvCell, validateIngest, levelDifference } from './domain.mjs';
 
@@ -30,12 +31,16 @@ async function bodyOf(request: Request): Promise<Record<string, any>> {
 }
 async function records<T>(kind: string): Promise<T[]> {
   const result = await database().prepare('SELECT data, version FROM records WHERE kind = ? ORDER BY record_id').bind(kind).all<{ data: string; version: number }>();
-  return result.results.map(row => ({ ...JSON.parse(row.data), ...(kind === 'station' ? { version: row.version } : {}) }));
+  return result.results.map(row => {
+    const value = JSON.parse(row.data);
+    return kind === 'station' ? enrichStationMetadata({ ...value, version: row.version }) : value;
+  });
 }
 async function record<T>(kind: string, id: string): Promise<{ value: T; version: number }> {
   const row = await database().prepare('SELECT data, version FROM records WHERE key = ?').bind(`${kind}:${id}`).first<RecordRow>();
   if (!row) throw new ApiError(404, 'Записът не е намерен.');
-  return { value: JSON.parse(row.data), version: row.version };
+  const value = JSON.parse(row.data);
+  return { value: kind === 'station' ? enrichStationMetadata(value) : value, version: row.version };
 }
 function auditStatement(session: Session, action: string, entity: string, details: string, municipality: string | null, conditional = false) {
   return database().prepare(`INSERT INTO audit_log (id, actor_id, actor, role, action, entity, details, municipality, created_at) SELECT ?,?,?,?,?,?,?,?,?${conditional ? ' WHERE changes() > 0' : ''}`)
@@ -76,17 +81,32 @@ async function saveApprovedApproval(value: any, previousVersion: number | undefi
 
 async function initialise() {
   const done = await database().prepare("SELECT value FROM app_settings WHERE key = 'seed_v1'").first();
+  if (!done) {
+    const stamp = nowISO();
+    const initial: { kind: string; value: any; municipality: string | null }[] = [
+      ...seedStations.map(value => ({ kind: 'station', value, municipality: value.municipality })),
+      ...seedRules.map(value => ({ kind: 'rule', value, municipality: null })),
+      { kind: 'order', municipality: 'Трявна', value: { id: 'ORD-DEMO-001', municipality: 'Трявна', productId: 'rls500', quantity: 1, reason: 'Учебна заявка за резервен радарен сензор към пилотния комплект.', status: 'submitted', createdAt: stamp, createdBy: 'Демонстрационен екип', note: 'Примерна вътрешна заявка. Няма поръчка към доставчик.', demo: true } },
+      { kind: 'ticket', municipality: 'Трявна', value: { id: 'SRV-DEMO-001', stationId: 'TRV-001', subject: 'Планирана проверка на пилотния комплект', description: 'Учебна сервизна задача: визуална проверка, захранване и съпоставка с водомерната рейка.', priority: 'normal', status: 'open', createdAt: stamp, createdBy: 'Демонстрационен екип' } },
+      { kind: 'approval', municipality: 'Трявна', value: { id: 'APR-DEMO-001', stationId: 'TRV-001', expert: '', municipalReference: '', regime: '', documentReference: '', status: 'draft', notes: 'Мястото предстои да се определи от специалисти и общината. Пунктът на картата е примерен.', createdAt: stamp } },
+    ];
+    const statements = initial.map(({kind, value, municipality}) => database().prepare("INSERT OR IGNORE INTO records (key, kind, record_id, municipality, station_id, data, version, created_at, updated_at) SELECT ?,?,?,?,?,?,1,?,? WHERE NOT EXISTS (SELECT 1 FROM app_settings WHERE key = 'seed_v1')").bind(`${kind}:${value.id}`, kind, value.id, municipality, value.stationId || null, JSON.stringify(value), stamp, stamp));
+    statements.push(database().prepare("INSERT OR IGNORE INTO app_settings (key, value) VALUES ('seed_v1', ?)").bind(stamp));
+    await database().batch(statements);
+  }
+  await addTryavnaPilotStations();
+}
+
+async function addTryavnaPilotStations() {
+  const key = 'seed_tryavna_five_stations_v1';
+  const done = await database().prepare('SELECT value FROM app_settings WHERE key = ?').bind(key).first();
   if (done) return;
   const stamp = nowISO();
-  const initial: { kind: string; value: any; municipality: string | null }[] = [
-    ...seedStations.map(value => ({ kind: 'station', value, municipality: value.municipality })),
-    ...seedRules.map(value => ({ kind: 'rule', value, municipality: null })),
-    { kind: 'order', municipality: 'Трявна', value: { id: 'ORD-DEMO-001', municipality: 'Трявна', productId: 'rls500', quantity: 1, reason: 'Учебна заявка за резервен радарен сензор към пилотния комплект.', status: 'submitted', createdAt: stamp, createdBy: 'Демонстрационен екип', note: 'Примерна вътрешна заявка. Няма поръчка към доставчик.', demo: true } },
-    { kind: 'ticket', municipality: 'Трявна', value: { id: 'SRV-DEMO-001', stationId: 'TRV-001', subject: 'Планирана проверка на пилотния комплект', description: 'Учебна сервизна задача: визуална проверка, захранване и съпоставка с водомерната рейка.', priority: 'normal', status: 'open', createdAt: stamp, createdBy: 'Демонстрационен екип' } },
-    { kind: 'approval', municipality: 'Трявна', value: { id: 'APR-DEMO-001', stationId: 'TRV-001', expert: '', municipalReference: '', regime: '', documentReference: '', status: 'draft', notes: 'Мястото предстои да се определи от специалисти и общината. Пунктът на картата е примерен.', createdAt: stamp } },
-  ];
-  const statements = initial.map(({kind, value, municipality}) => database().prepare('INSERT OR IGNORE INTO records (key, kind, record_id, municipality, station_id, data, version, created_at, updated_at) VALUES (?,?,?,?,?,?,1,?,?)').bind(`${kind}:${value.id}`, kind, value.id, municipality, value.stationId || null, JSON.stringify(value), stamp, stamp));
-  statements.push(database().prepare("INSERT OR IGNORE INTO app_settings (key, value) VALUES ('seed_v1', ?)").bind(stamp));
+  const additions = seedStations.filter(station => station.id === 'TRV-004' || station.id === 'TRV-005');
+  // Маркерът и двата записа се прилагат атомарно. Проверката вътре в batch
+  // пази и от успоредни заявки; съществуващ идентификатор не се презаписва.
+  const statements = additions.map(station => database().prepare('INSERT OR IGNORE INTO records (key, kind, record_id, municipality, station_id, data, version, created_at, updated_at) SELECT ?,?,?,?,?,?,1,?,? WHERE NOT EXISTS (SELECT 1 FROM app_settings WHERE key = ?)').bind(`station:${station.id}`, 'station', station.id, station.municipality, null, JSON.stringify(station), stamp, stamp, key));
+  statements.push(database().prepare('INSERT OR IGNORE INTO app_settings (key, value) VALUES (?, ?)').bind(key, stamp));
   await database().batch(statements);
 }
 
@@ -344,7 +364,13 @@ export async function handleApi(request: Request): Promise<Response> {
         const value = validateStation(input, old.value, session);
         if (value.health !== old.value.health && value.health !== 'online') value.stoppedAt = nowISO();
         if (value.health === 'online') delete value.stoppedAt;
-        await saveRecord('station', value, session, value.municipality, old.version);
+        const previousSection: Record<string, unknown> = { ...old.value.riverSection };
+        const sectionChanged = Object.entries(value.riverSection).some(([key, next]) => next !== previousSection[key]);
+        const locationChanged = (['lat', 'lng', 'municipality', 'river'] as const).some(key => value[key] !== old.value[key]);
+        const details = sectionChanged
+          ? `${value.name}; речен участък: ${locationChanged ? 'нулиран след промяна на местоположението' : 'обновен профил'}; ${value.riverSection.status === 'verified' ? `потвърден от ${value.riverSection.reviewedBy}, документ: ${value.riverSection.reference}` : 'за експертна проверка'}`
+          : undefined;
+        await saveRecord('station', value, session, value.municipality, old.version, details);
         return json({ ...value, version: old.version + 1 });
       }
     }
