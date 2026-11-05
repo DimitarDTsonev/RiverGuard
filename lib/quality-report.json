@@ -1,0 +1,704 @@
+{
+  "title": "Протокол от автоматични проверки",
+  "executedAt": "2026-11-05T19:19:45.198Z",
+  "command": "node --test tests/*.test.mjs",
+  "result": "passed",
+  "total": 88,
+  "passed": 88,
+  "failed": 0,
+  "skipped": 0,
+  "groups": [
+    {
+      "name": "Интеграционни API проверки",
+      "file": "tests/api.test.mjs",
+      "total": 32,
+      "passed": 32
+    },
+    {
+      "name": "Домейн проверки",
+      "file": "tests/domain.test.mjs",
+      "total": 56,
+      "passed": 56
+    }
+  ],
+  "typecheck": {
+    "command": "node node_modules/typescript/bin/tsc --noEmit --pretty false",
+    "result": "passed"
+  },
+  "environment": "Node.js; действителният API код е изпълнен върху SQLite с D1-съвместим адаптер. Платформената идентичност е контролирана от тестовата среда.",
+  "verificationScope": "Права, общински обхват, валидация, независими измервателни канали, времеви печати, експорт, неизменност на суровите записи, исторически метаданни, заявки, одобрения, обучения и правила. Правилото за качество е проверено за съмнителен или липсващ канал, учебен праг 0,05 m, епизодност, интервал и включване/изключване.",
+  "limitations": [
+    "Резултатът се отнася за проверената версия на кода; не представлява сертификат за нормативно съответствие.",
+    "Тестовете не удостоверяват работа с физически сензори, теренна точност или непрекъсната производствена наличност.",
+    "Браузърните проверки, производственото внедряване и приемането от възложителя се отчитат отделно."
+  ],
+  "checks": [
+    {
+      "id": "CHECK-001",
+      "name": "API bootstrap създава начален администратор и постоянен набор",
+      "status": "passed",
+      "durationMs": 56.440565,
+      "kind": "api"
+    },
+    {
+      "id": "CHECK-002",
+      "name": "производственият API отказва липсваща идентичност",
+      "status": "passed",
+      "durationMs": 6.646038,
+      "kind": "api"
+    },
+    {
+      "id": "CHECK-003",
+      "name": "нов посетител не получава администраторска роля",
+      "status": "passed",
+      "durationMs": 10.992848,
+      "kind": "api"
+    },
+    {
+      "id": "CHECK-004",
+      "name": "действителният общински оператор не може да симулира admin",
+      "status": "passed",
+      "durationMs": 15.609097,
+      "kind": "api"
+    },
+    {
+      "id": "CHECK-005",
+      "name": "ролята се чете от сървърната сесия, без доверие в тялото",
+      "status": "passed",
+      "durationMs": 11.30477,
+      "kind": "api"
+    },
+    {
+      "id": "CHECK-006",
+      "name": "администраторът може да се върне от демонстрационен viewer",
+      "status": "passed",
+      "durationMs": 20.502168,
+      "kind": "api"
+    },
+    {
+      "id": "CHECK-007",
+      "name": "общински API PATCH отказва чужда станция",
+      "status": "passed",
+      "durationMs": 9.76954,
+      "kind": "api"
+    },
+    {
+      "id": "CHECK-008",
+      "name": "наблюдателят не създава вътрешни заявки",
+      "status": "passed",
+      "durationMs": 8.451829,
+      "kind": "api"
+    },
+    {
+      "id": "CHECK-009",
+      "name": "общинският експорт не съдържа чужди станции",
+      "status": "passed",
+      "durationMs": 153.176058,
+      "kind": "api"
+    },
+    {
+      "id": "CHECK-010",
+      "name": "националната справка включва всички станции в най-новите 10000",
+      "status": "passed",
+      "durationMs": 355.784646,
+      "kind": "api"
+    },
+    {
+      "id": "CHECK-011",
+      "name": "offline историята е в избрания период и е валидна преди прекъсване",
+      "status": "passed",
+      "durationMs": 21.485657,
+      "kind": "api"
+    },
+    {
+      "id": "CHECK-012",
+      "name": "маркиране на симулирано измерване се вижда при quality филтър",
+      "status": "passed",
+      "durationMs": 43.660251,
+      "kind": "api"
+    },
+    {
+      "id": "CHECK-013",
+      "name": "суровата телеметрия се пази след маркиране и дубликат се отказва",
+      "status": "passed",
+      "durationMs": 60.124977,
+      "kind": "api"
+    },
+    {
+      "id": "CHECK-014",
+      "name": "ingest не приема непознат bearer ключ",
+      "status": "passed",
+      "durationMs": 10.63039,
+      "kind": "api"
+    },
+    {
+      "id": "CHECK-015",
+      "name": "съгласуването и мястото се одобряват в една транзакция",
+      "status": "passed",
+      "durationMs": 13.186197,
+      "kind": "api"
+    },
+    {
+      "id": "CHECK-016",
+      "name": "старо съгласуване не одобрява променени координати",
+      "status": "passed",
+      "durationMs": 11.03795,
+      "kind": "api"
+    },
+    {
+      "id": "CHECK-017",
+      "name": "общинско одобрение на заявка се отказва",
+      "status": "passed",
+      "durationMs": 6.358966,
+      "kind": "api"
+    },
+    {
+      "id": "CHECK-018",
+      "name": "невалиден HTTP метод не заобикаля договорения маршрут",
+      "status": "passed",
+      "durationMs": 4.932459,
+      "kind": "api"
+    },
+    {
+      "id": "CHECK-019",
+      "name": "обученията позволяват само регистрирани идентификатори",
+      "status": "passed",
+      "durationMs": 12.786336,
+      "kind": "api"
+    },
+    {
+      "id": "CHECK-020",
+      "name": "повторен bootstrap не дублира сигналите",
+      "status": "passed",
+      "durationMs": 13.655438,
+      "kind": "api"
+    },
+    {
+      "id": "CHECK-021",
+      "name": "повторна опасност след нормализиране създава нов епизод",
+      "status": "passed",
+      "durationMs": 29.781113,
+      "kind": "api"
+    },
+    {
+      "id": "CHECK-022",
+      "name": "правилата спазват конфигурирания интервал",
+      "status": "passed",
+      "durationMs": 14.457229,
+      "kind": "api"
+    },
+    {
+      "id": "CHECK-023",
+      "name": "новата телеметрия задейства правилата без отворен екран",
+      "status": "passed",
+      "durationMs": 17.421431,
+      "kind": "api"
+    },
+    {
+      "id": "CHECK-024",
+      "name": "липсващ ingest ключ връща изрично неконфигурирана услуга",
+      "status": "passed",
+      "durationMs": 5.624038,
+      "kind": "api"
+    },
+    {
+      "id": "CHECK-025",
+      "name": "стара версия не презаписва чужда промяна по станция",
+      "status": "passed",
+      "durationMs": 18.445942,
+      "kind": "api"
+    },
+    {
+      "id": "CHECK-026",
+      "name": "JSON експортът отбелязва ограничението и в HTTP заглавката",
+      "status": "passed",
+      "durationMs": 598.499927,
+      "kind": "api"
+    },
+    {
+      "id": "CHECK-027",
+      "name": "реален запис пази snapshot след преименуване и преместване на станцията",
+      "status": "passed",
+      "durationMs": 384.119429,
+      "kind": "api"
+    },
+    {
+      "id": "CHECK-028",
+      "name": "историческата община управлява експорта след преместване, без изтичане към новата",
+      "status": "passed",
+      "durationMs": 87.218873,
+      "kind": "api"
+    },
+    {
+      "id": "CHECK-029",
+      "name": "маркиране като съмнително изключва delta, без да променя суровите канали",
+      "status": "passed",
+      "durationMs": 41.285744,
+      "kind": "api"
+    },
+    {
+      "id": "CHECK-030",
+      "name": "правилото за качество сигнализира съмнителен и липсващ основен или регистриран резервен канал",
+      "status": "passed",
+      "durationMs": 23.275285,
+      "kind": "api"
+    },
+    {
+      "id": "CHECK-031",
+      "name": "учебният праг за качество има точна граница и нов епизод след нормализиране",
+      "status": "passed",
+      "durationMs": 24.216005,
+      "kind": "api"
+    },
+    {
+      "id": "CHECK-032",
+      "name": "превключвателят и интервалът управляват сигнала за качество, без да изключват ingest валидацията",
+      "status": "passed",
+      "durationMs": 13.750751,
+      "kind": "api"
+    },
+    {
+      "id": "CHECK-033",
+      "name": "общинският оператор управлява собствената община",
+      "status": "passed",
+      "durationMs": 2.475671,
+      "kind": "domain"
+    },
+    {
+      "id": "CHECK-034",
+      "name": "общинският оператор не управлява друга община",
+      "status": "passed",
+      "durationMs": 1.014539,
+      "kind": "domain"
+    },
+    {
+      "id": "CHECK-035",
+      "name": "администраторът управлява всички общини",
+      "status": "passed",
+      "durationMs": 2.697848,
+      "kind": "domain"
+    },
+    {
+      "id": "CHECK-036",
+      "name": "наблюдателят няма права за запис",
+      "status": "passed",
+      "durationMs": 0.319455,
+      "kind": "domain"
+    },
+    {
+      "id": "CHECK-037",
+      "name": "техникът няма права за промяна на станции",
+      "status": "passed",
+      "durationMs": 0.725684,
+      "kind": "domain"
+    },
+    {
+      "id": "CHECK-038",
+      "name": "техникът има достъп до собствените сервизни задачи",
+      "status": "passed",
+      "durationMs": 0.382572,
+      "kind": "domain"
+    },
+    {
+      "id": "CHECK-039",
+      "name": "техникът няма сервизни права за чужда община",
+      "status": "passed",
+      "durationMs": 0.72338,
+      "kind": "domain"
+    },
+    {
+      "id": "CHECK-040",
+      "name": "ефективната демонстрационна роля ограничава actual admin",
+      "status": "passed",
+      "durationMs": 0.389886,
+      "kind": "domain"
+    },
+    {
+      "id": "CHECK-041",
+      "name": "собствена станция се редактира",
+      "status": "passed",
+      "durationMs": 0.240654,
+      "kind": "domain"
+    },
+    {
+      "id": "CHECK-042",
+      "name": "промяна на municipalityId не заобикаля обхвата",
+      "status": "passed",
+      "durationMs": 0.534773,
+      "kind": "domain"
+    },
+    {
+      "id": "CHECK-043",
+      "name": "нови станции се създават само от администратор",
+      "status": "passed",
+      "durationMs": 0.144785,
+      "kind": "domain"
+    },
+    {
+      "id": "CHECK-044",
+      "name": "PATCH не одобрява място за монтаж",
+      "status": "passed",
+      "durationMs": 0.100045,
+      "kind": "domain"
+    },
+    {
+      "id": "CHECK-045",
+      "name": "промяна на координати обезсилва одобрението на мястото",
+      "status": "passed",
+      "durationMs": 0.132213,
+      "kind": "domain"
+    },
+    {
+      "id": "CHECK-046",
+      "name": "праговете са подредени",
+      "status": "passed",
+      "durationMs": 0.172512,
+      "kind": "domain"
+    },
+    {
+      "id": "CHECK-047",
+      "name": "интервалите са положителни",
+      "status": "passed",
+      "durationMs": 0.606832,
+      "kind": "domain"
+    },
+    {
+      "id": "CHECK-048",
+      "name": "координатите са ограничени до географския обхват",
+      "status": "passed",
+      "durationMs": 0.184453,
+      "kind": "domain"
+    },
+    {
+      "id": "CHECK-049",
+      "name": "серверът отказва външен Origin",
+      "status": "passed",
+      "durationMs": 5.583853,
+      "kind": "domain"
+    },
+    {
+      "id": "CHECK-050",
+      "name": "серверът отказва simple-form CSRF съдържание",
+      "status": "passed",
+      "durationMs": 0.618178,
+      "kind": "domain"
+    },
+    {
+      "id": "CHECK-051",
+      "name": "JSON заявка от същия произход се допуска",
+      "status": "passed",
+      "durationMs": 0.544378,
+      "kind": "domain"
+    },
+    {
+      "id": "CHECK-052",
+      "name": "вътрешна заявка запазва демонстрационния характер",
+      "status": "passed",
+      "durationMs": 0.713306,
+      "kind": "domain"
+    },
+    {
+      "id": "CHECK-053",
+      "name": "поръчка за чужда община се отказва",
+      "status": "passed",
+      "durationMs": 0.226124,
+      "kind": "domain"
+    },
+    {
+      "id": "CHECK-054",
+      "name": "неизвестен продукт се отказва",
+      "status": "passed",
+      "durationMs": 0.095069,
+      "kind": "domain"
+    },
+    {
+      "id": "CHECK-055",
+      "name": "отрицателно и нецяло количество се отказва",
+      "status": "passed",
+      "durationMs": 0.325968,
+      "kind": "domain"
+    },
+    {
+      "id": "CHECK-056",
+      "name": "общината не одобрява сама подадена заявка",
+      "status": "passed",
+      "durationMs": 0.113048,
+      "kind": "domain"
+    },
+    {
+      "id": "CHECK-057",
+      "name": "не може да се прескочи одобрението до получена доставка",
+      "status": "passed",
+      "durationMs": 0.191598,
+      "kind": "domain"
+    },
+    {
+      "id": "CHECK-058",
+      "name": "администратор одобрява подадена заявка",
+      "status": "passed",
+      "durationMs": 0.089,
+      "kind": "domain"
+    },
+    {
+      "id": "CHECK-059",
+      "name": "одобрено съгласуване изисква всички документи",
+      "status": "passed",
+      "durationMs": 0.201016,
+      "kind": "domain"
+    },
+    {
+      "id": "CHECK-060",
+      "name": "общината не може сама да потвърди окончателно съгласуване",
+      "status": "passed",
+      "durationMs": 0.162227,
+      "kind": "domain"
+    },
+    {
+      "id": "CHECK-061",
+      "name": "пълно съгласуване се приема от администратор",
+      "status": "passed",
+      "durationMs": 0.109685,
+      "kind": "domain"
+    },
+    {
+      "id": "CHECK-062",
+      "name": "същият измервателен интервал връща едни и същи данни",
+      "status": "passed",
+      "durationMs": 1.632422,
+      "kind": "domain"
+    },
+    {
+      "id": "CHECK-063",
+      "name": "offline timestamp не се обновява от презареждане",
+      "status": "passed",
+      "durationMs": 0.543395,
+      "kind": "domain"
+    },
+    {
+      "id": "CHECK-064",
+      "name": "поддръжката не произвежда нови фиктивни измервания",
+      "status": "passed",
+      "durationMs": 0.361836,
+      "kind": "domain"
+    },
+    {
+      "id": "CHECK-065",
+      "name": "демонстрацията не измисля дебит без крива",
+      "status": "passed",
+      "durationMs": 0.123801,
+      "kind": "domain"
+    },
+    {
+      "id": "CHECK-066",
+      "name": "аларменият ключ предотвратява дублиране при всеки refresh",
+      "status": "passed",
+      "durationMs": 1.067981,
+      "kind": "domain"
+    },
+    {
+      "id": "CHECK-067",
+      "name": "различни типове аларми имат различни ключове",
+      "status": "passed",
+      "durationMs": 0.116677,
+      "kind": "domain"
+    },
+    {
+      "id": "CHECK-068",
+      "name": "общинският експорт е териториално ограничен",
+      "status": "passed",
+      "durationMs": 0.45978,
+      "kind": "domain"
+    },
+    {
+      "id": "CHECK-069",
+      "name": "обърнат период се отказва",
+      "status": "passed",
+      "durationMs": 0.591876,
+      "kind": "domain"
+    },
+    {
+      "id": "CHECK-070",
+      "name": "период над седем дни се отказва",
+      "status": "passed",
+      "durationMs": 0.276679,
+      "kind": "domain"
+    },
+    {
+      "id": "CHECK-071",
+      "name": "CSV формула, включително след празно пространство, се обезврежда",
+      "status": "passed",
+      "durationMs": 2.773893,
+      "kind": "domain"
+    },
+    {
+      "id": "CHECK-072",
+      "name": "CSV запазва числови отрицателни стойности и кавички",
+      "status": "passed",
+      "durationMs": 0.157026,
+      "kind": "domain"
+    },
+    {
+      "id": "CHECK-073",
+      "name": "входната телеметрия получава сървърно време и произход",
+      "status": "passed",
+      "durationMs": 0.514307,
+      "kind": "domain"
+    },
+    {
+      "id": "CHECK-074",
+      "name": "бъдеща телеметрия се отказва",
+      "status": "passed",
+      "durationMs": 0.224136,
+      "kind": "domain"
+    },
+    {
+      "id": "CHECK-075",
+      "name": "нечислово ниво и извъндиапазонен заряд се отказват",
+      "status": "passed",
+      "durationMs": 0.484657,
+      "kind": "domain"
+    },
+    {
+      "id": "CHECK-076",
+      "name": "реална телеметрия не може да присвои SIM идентификатор",
+      "status": "passed",
+      "durationMs": 0.358071,
+      "kind": "domain"
+    },
+    {
+      "id": "CHECK-077",
+      "name": "историческите измервания преди прекъсване са валидни и с правилно време",
+      "status": "passed",
+      "durationMs": 0.272689,
+      "kind": "domain"
+    },
+    {
+      "id": "CHECK-078",
+      "name": "без валежомер стойността за валеж липсва",
+      "status": "passed",
+      "durationMs": 0.914061,
+      "kind": "domain"
+    },
+    {
+      "id": "CHECK-079",
+      "name": "валежомерът задава 60-минутния период",
+      "status": "passed",
+      "durationMs": 0.165859,
+      "kind": "domain"
+    },
+    {
+      "id": "CHECK-080",
+      "name": "телеметрия без известен период на валежа се отказва",
+      "status": "passed",
+      "durationMs": 0.146096,
+      "kind": "domain"
+    },
+    {
+      "id": "CHECK-081",
+      "name": "резервният PLS канал има независима детерминистична вариация",
+      "status": "passed",
+      "durationMs": 8.639022,
+      "kind": "domain"
+    },
+    {
+      "id": "CHECK-082",
+      "name": "липсващ PLS не създава резервни измервания",
+      "status": "passed",
+      "durationMs": 0.219283,
+      "kind": "domain"
+    },
+    {
+      "id": "CHECK-083",
+      "name": "ingest приема резервно ниво само за регистриран PLS",
+      "status": "passed",
+      "durationMs": 0.164042,
+      "kind": "domain"
+    },
+    {
+      "id": "CHECK-084",
+      "name": "разликата се изчислява сървърно и не се приема от устройството",
+      "status": "passed",
+      "durationMs": 0.080133,
+      "kind": "domain"
+    },
+    {
+      "id": "CHECK-085",
+      "name": "невалиден основен или резервен канал изключва изчислената разлика",
+      "status": "passed",
+      "durationMs": 0.148302,
+      "kind": "domain"
+    },
+    {
+      "id": "CHECK-086",
+      "name": "snapshot се получава от регистъра, а не от метаданни на устройството",
+      "status": "passed",
+      "durationMs": 0.221056,
+      "kind": "domain"
+    },
+    {
+      "id": "CHECK-087",
+      "name": "скорост без регистриран RQ-30 се отказва",
+      "status": "passed",
+      "durationMs": 0.145654,
+      "kind": "domain"
+    },
+    {
+      "id": "CHECK-088",
+      "name": "дебитът се отказва без валидиран профил и модел",
+      "status": "passed",
+      "durationMs": 0.10332,
+      "kind": "domain"
+    }
+  ],
+  "browserVerification": {
+    "executedAt": "2026-11-05T19:26:41.256560+00:00",
+    "environment": "Chrome, управляван преглед на приложението; отделна локална база с учебни записи.",
+    "checks": [
+      {
+        "id": "B-01",
+        "result": "passed",
+        "name": "Подробна карта: България, увеличение до Трявна и избор на отделен пункт."
+      },
+      {
+        "id": "B-02",
+        "result": "passed",
+        "name": "Демонстрационният общински профил прилага обхват Трявна; формулярът за заявка предлага само разрешената община."
+      },
+      {
+        "id": "B-03",
+        "result": "passed",
+        "name": "Общинска заявка се записва със статус за одобрение; общинският профил няма бутони за административно одобрение."
+      },
+      {
+        "id": "B-04",
+        "result": "passed",
+        "name": "Администраторът одобрява същата вътрешна заявка; новият статус се вижда в регистъра."
+      },
+      {
+        "id": "B-05",
+        "result": "passed",
+        "name": "Изтеглен JSON при национален преглед и общински профил: 183 измервания само от TRV-001, TRV-002 и TRV-003, с двата канала, разлика и исторически метаданни; без ограничаване на резултата."
+      },
+      {
+        "id": "B-06",
+        "result": "passed",
+        "name": "Отворен и попълнен работен формуляр F-01; видими полета за експертно основание, общинско съгласуване и приложим режим."
+      },
+      {
+        "id": "B-07",
+        "result": "passed",
+        "name": "Учебен модул TR-01: 3 от 3 верни отговора; преминаването е записано и се вижда при повторно зареждане."
+      },
+      {
+        "id": "B-08",
+        "result": "passed",
+        "name": "Визуален преглед на таблото в рамки с ширини 390 и 768 пиксела: адаптивни карти и показатели, отделно меню и липса на видимо хоризонтално преливане."
+      }
+    ],
+    "limitations": [
+      "Проверката на тесните ширини е в браузърни рамки, не на физически телефони.",
+      "Системният печат, изпращането към институции и външни доставчици не са изпълнявани.",
+      "Тези проверки не заменят приемането от общината, одит за достъпност, тест с хардуер и изпитване под товар."
+    ]
+  }
+}

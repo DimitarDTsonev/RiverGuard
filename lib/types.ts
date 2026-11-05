@@ -1,0 +1,13 @@
+export type Role = 'admin' | 'municipal' | 'analyst' | 'technician' | 'viewer';
+export type Session = {userId:string;name:string;role:Role;municipality:string|null;actualRole:Role;demo:boolean;preview:boolean};
+export type StationSnapshot = {stationName:string;river:string;municipality:string;oblast:string;region:string;basin:string;lat:number;lng:number;stationVersion:number};
+export type Reading = {id:string;stationId:string;measuredAt:string;receivedAt:string;level:number;levelBackup:number|null;levelBackupQuality:'valid'|'suspect'|'missing';levelDelta:number|null;temperature:number;rain:number|null;rainPeriodMinutes:60|null;velocity:number|null;discharge:number|null;quality:'valid'|'suspect'|'missing';source:'simulated'|'device';battery:number;signal:number;status:'normal'|'warning'|'critical'|'offline'|'maintenance';stationSnapshot?:StationSnapshot};
+export type Station = {id:string;name:string;river:string;municipality:string;oblast:string;region:string;basin:string;lat:number;lng:number;kind:string;sensors:string[];interval:number;transmitInterval:number;warning:number;critical:number;baseLevel:number;health:'online'|'offline'|'maintenance';battery:number;signal:number;locationStatus:'proposed'|'reviewed'|'approved';notes:string;current?:Reading;version?:number};
+export type Alert = {id:string;stationId:string;title:string;severity:'warning'|'critical'|'offline';createdAt:string;status:'open'|'acknowledged';ackBy?:string;ackAt?:string;note?:string};
+export type Order = {id:string;municipality:string;productId:string;quantity:number;reason:string;status:'draft'|'submitted'|'approved'|'rejected'|'received';createdAt:string;createdBy:string;note?:string;demo:true};
+export type Ticket = {id:string;stationId:string;subject:string;description:string;priority:'normal'|'high'|'critical';status:'open'|'in_progress'|'resolved';createdAt:string;createdBy:string;resolution?:string};
+export type Approval = {id:string;stationId:string;expert:string;municipalReference:string;regime:string;documentReference:string;status:'draft'|'submitted'|'approved'|'rejected';notes:string;createdAt:string};
+export type AuditEntry = {id:string;actor:string;role:Role;action:string;entity:string;details:string;createdAt:string};
+export type Rule = {id:string;name:string;description:string;enabled:boolean;interval:number;lastRun:string|null};
+export type Membership = {userId:string;name:string;role:Role;municipality:string|null};
+export type Bootstrap = {session:Session;stations:Station[];alerts:Alert[];orders:Order[];tickets:Ticket[];approvals:Approval[];audit:AuditEntry[];rules:Rule[];trainingCompletions:string[];memberships:Membership[];serverTime:string};
